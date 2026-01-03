@@ -327,7 +327,7 @@ export default function App() {
           <h3 className="font-bold mb-4 flex gap-2"><MapPin className="text-blue-600 w-5 h-5"/> Check-In (Mandatory)</h3>
           {!data.location ? <button onClick={handleStart} className="bg-blue-600 text-white px-6 py-2 rounded">{loadingLoc?'Locating...':'Check-In & Start Timer'}</button> : 
           <div className="flex flex-col gap-3">
-             <div className="flex gap-4 items-center"><span className="text-green-600 font-bold bg-green-50 px-2 py-1 rounded">Active</span><span className="text-xs font-mono">{data.location.lat.toFixed(4)},{data.location.lng.toFixed(4)}</span></div>
+             <div className="flex gap-4 items-center"><span className="text-green-600 font-bold bg-green-50 px-2 py-1 rounded">Active</span><span className="text-xs font-mono">{data.location.lat.toFixed(4)},{data.location.lng.toFixed(4)}</span><span className="text-xs font-mono">Start: {new Date(data.startTime!).toLocaleString()}</span></div>
              <div className="flex items-center gap-3">
                 {data.inspectorSelfie ? <img src={data.inspectorSelfie} className="w-16 h-16 rounded object-cover border" /> : <label className="w-16 h-16 bg-slate-100 flex items-center justify-center rounded cursor-pointer border-2 border-dashed"><Camera className="w-6 h-6 text-slate-400"/><input type="file" accept="image/*" capture="user" className="hidden" onChange={e=>{if(e.target.files?.[0]) setData(p=>({...p,inspectorSelfie:URL.createObjectURL(e.target.files![0])}))}}/></label>}
                 <div className="text-sm font-bold text-slate-600">Inspector Selfie</div>
@@ -520,6 +520,13 @@ export default function App() {
           <div className="grid grid-cols-2 gap-4 mb-6 text-sm bg-slate-50 p-4 rounded border">
              <div><span className="block text-xs text-slate-400 uppercase">Buyer</span><b>{data.buyerName}</b><div className="text-xs">{data.buyerDetails}</div></div>
              <div className="grid grid-cols-2 gap-2"><div><span className="block text-xs text-slate-400">Lot</span><b>{data.lotNo}</b></div><div><span className="block text-xs text-slate-400">Count</span><b>{data.yarnCountLabel}</b></div></div>
+          </div>
+          
+          <div className="mb-6 text-sm bg-slate-50 p-4 rounded border">
+             <h4 className="font-bold mb-2">Inspection Details</h4>
+             <p>Start Time: {data.startTime ? new Date(data.startTime).toLocaleString() : '--'}</p>
+             <p>End Time: {data.endTime ? new Date(data.endTime).toLocaleString() : '--'}</p>
+             <p>Duration: {elapsedTime}</p>
           </div>
           
           <div className="mb-6 break-inside-avoid">
