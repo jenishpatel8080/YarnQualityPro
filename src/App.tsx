@@ -329,12 +329,12 @@ export default function App() {
           q
 
           <div className="flex flex-col gap-3">
-             <div className="flex gap-4 items-center"><span className="text-green-600 font-bold bg-green-50 px-2 py-1 rounded">Active</span><span className="text-xs font-mono">{data.location.lat.toFixed(4)},{data.location.lng.toFixed(4)}</span><span className="text-xs font-mono">Start: {new Date(data.startTime!).toLocaleString()}</span></div>
+             <div className="flex gap-4 items-center"><span className="text-green-600 font-bold bg-green-50 px-2 py-1 rounded">Active</span><span className="text-xs font-mono">{data.location ? `${data.location.lat.toFixed(4)},${data.location.lng.toFixed(4)}` : 'Location not available'}</span><span className="text-xs font-mono">Start: {data.startTime ? new Date(data.startTime).toLocaleString() : 'Not started'}</span></div>
              <div className="flex items-center gap-3">
                 {data.inspectorSelfie ? <img src={data.inspectorSelfie} className="w-16 h-16 rounded object-cover border" /> : <label className="w-16 h-16 bg-slate-100 flex items-center justify-center rounded cursor-pointer border-2 border-dashed"><Camera className="w-6 h-6 text-slate-400"/><input type="file" accept="image/*" capture="environment" className="hidden" onChange={e=>{if(e.target.files?.[0]) setData(p=>({...p,inspectorSelfie:URL.createObjectURL(e.target.files![0])}))}}/></label>}
                 <div className="text-sm font-bold text-slate-600">Inspector Selfie</div>
              </div>
-          </div>}
+          </div>
        </div>
        
        <div className="bg-white p-6 rounded shadow-sm border">
