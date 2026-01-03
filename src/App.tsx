@@ -325,8 +325,13 @@ export default function App() {
     <div className="space-y-6">
        <div className="bg-white p-6 rounded shadow-sm border">
           <h3 className="font-bold mb-4 flex gap-2"><MapPin className="text-blue-600 w-5 h-5"/> Check-In (Mandatory)</h3>
-          h
-          q
+          {data.status === 'draft' && (
+            <div className="mb-4">
+              <button onClick={handleStart} disabled={loadingLoc} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50">
+                {loadingLoc ? 'Getting Location...' : 'Start Inspection'}
+              </button>
+            </div>
+          )}
 
           <div className="flex flex-col gap-3">
              <div className="flex gap-4 items-center"><span className="text-green-600 font-bold bg-green-50 px-2 py-1 rounded">Active</span><span className="text-xs font-mono">{data.location ? `${data.location.lat.toFixed(4)},${data.location.lng.toFixed(4)}` : 'Location not available'}</span><span className="text-xs font-mono">Start: {data.startTime ? new Date(data.startTime).toLocaleString() : 'Not started'}</span></div>
