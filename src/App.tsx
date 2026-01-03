@@ -63,6 +63,7 @@ interface LabData {
   thick35: string; thick50: string;
   neps140: string; neps200: string;
   cutsPer100km: string; uvCheck: 'pass' | 'fail'; blackBoard: 'A+' | 'A' | 'B' | 'C';
+  ipi: string;
   labRemarks: string; reportPhotos: PhotoEvidence[];
 }
 
@@ -109,7 +110,7 @@ const INITIAL_LAB: LabData = {
   actualCount: '', countCV: '', csp: '', strength: '', strengthCV: '', rkm: '', tpi: '', moisture: '',
   uPercent: '', usterCV: '', hairiness: '', hairinessCV: '',
   thin30: '', thin40: '', thin50: '', thick35: '', thick50: '', neps140: '', neps200: '',
-  cutsPer100km: '', uvCheck: 'pass', blackBoard: 'A', labRemarks: '', reportPhotos: []
+  cutsPer100km: '', uvCheck: 'pass', blackBoard: 'A', ipi: '', labRemarks: '', reportPhotos: []
 };
 
 const INITIAL_COTTON: CottonParams = { spanLength: '', mic: '', strength: '', trash: '', sfi: '', rd: '', plusB: '', moisture: '', remarks: '', photos: [] };
@@ -549,7 +550,7 @@ export default function App() {
              <table className="w-full text-xs text-left mb-4">
                 <tbody>
                    <tr><td>Count: <b>{data.labData.actualCount}</b></td><td>CSP: <b>{data.labData.csp}</b></td><td>Strength: <b>{data.labData.strength}</b></td></tr>
-                   <tr><td>U%: <b>{data.labData.uPercent}</b></td><td>Hairiness: <b>{data.labData.hairiness}</b></td><td>Moisture: <b>{data.labData.moisture}%</b></td></tr>
+                   <tr><td>U%: <b>{data.labData.uPercent}</b></td><td>Hairiness: <b>{data.labData.hairiness}</b></td><td>Moisture: <b>{data.labData.moisture}%</b></td><td>IPI: <b>{data.labData.ipi}</b></td></tr>
                 </tbody>
              </table>
              <div className="font-bold text-xs mb-1">IPI Details</div>
