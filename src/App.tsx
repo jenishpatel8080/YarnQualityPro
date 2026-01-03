@@ -596,7 +596,7 @@ export default function App() {
          <div className="font-bold text-lg text-blue-900">YarnQuality<span className="text-blue-500">Pro</span></div>
          <div className="flex gap-4 items-center">
             {data.status==='in-progress' && <div className="text-xs font-mono bg-red-100 text-red-600 px-2 py-1 rounded flex gap-1"><Timer className="w-3 h-3"/>{elapsedTime}</div>}
-            <div className="flex gap-1 overflow-x-auto">{['general','raw_material','packaging','visual','lab','report'].map(t => <button key={t} onClick={()=>setActiveTab(t)} className={`w-3 h-3 rounded-full ${activeTab===t?'bg-blue-600':'bg-slate-200'}`} title={t}/>)}</div>
+            <div className="flex gap-1 overflow-x-auto">{(['general','raw_material','packaging','visual','lab','report'] as const).map(t => <button key={t} onClick={()=>setActiveTab(t)} className={`w-3 h-3 rounded-full ${activeTab===t?'bg-blue-600':'bg-slate-200'}`} title={t}/>)}</div>
          </div>
       </header>
       <main className="max-w-5xl mx-auto p-4 print:max-w-none print:p-0">
