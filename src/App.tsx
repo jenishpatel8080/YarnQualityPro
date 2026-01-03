@@ -370,7 +370,7 @@ export default function App() {
                 <div><label className="text-xs font-bold text-slate-500 uppercase block mb-1">Prod Start</label><input type="date" className="w-full p-2 border rounded" value={data.productionStartDate} onChange={e=>handleGeneral('productionStartDate', e.target.value)}/></div>
                 <div><label className="text-xs font-bold text-slate-500 uppercase block mb-1">Prod End</label><input type="date" className="w-full p-2 border rounded" value={data.productionEndDate} onChange={e=>handleGeneral('productionEndDate', e.target.value)}/></div>
              </div>
-             <div><label className="text-xs font-bold text-slate-500 uppercase block mb-1">Total Quantity (Cartons)</label><input type="number" className="w-full p-2 border rounded" value={data.packaging.totalCartonsInLot} onChange={e=>setData(p=>({...p, packaging: {...p.packaging, totalCartonsInLot: parseInt(e.target.value)||0}}))}/></div>
+             <div><label className="text-xs font-bold text-slate-500 uppercase block mb-1">Total Quantity ({data.packaging.modeOfPacking === 'Box' ? 'Cartons' : data.packaging.modeOfPacking === 'Pallet' ? 'Pallets' : 'Bags'})</label><input type="number" className="w-full p-2 border rounded" value={data.packaging.totalCartonsInLot} onChange={e=>setData(p=>({...p, packaging: {...p.packaging, totalCartonsInLot: parseInt(e.target.value)||0}}))}/></div>
           </div>
        </div>
        <div className="flex justify-end"><button onClick={()=>setActiveTab('raw_material')} className="bg-blue-600 text-white px-4 py-2 rounded">Next</button></div>
