@@ -409,9 +409,18 @@ export default function App() {
        <div className="bg-white p-6 rounded-xl border shadow-sm">
           <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Package className="w-5 h-5 text-orange-600"/> Packaging Specs</h3>
           <div className="grid grid-cols-3 gap-4 mb-4">
-             <input className="border p-1 rounded" placeholder="Box Size" value={data.packaging.cartonSize} onChange={e=>setData(p=>({...p, packaging: {...p.packaging, cartonSize: e.target.value}}))} />
-             <input className="border p-1 rounded" placeholder="Strap Color" value={data.packaging.strapColor} onChange={e=>setData(p=>({...p, packaging: {...p.packaging, strapColor: e.target.value}}))} />
-             <input className="border p-1 rounded" placeholder="Ply" value={data.packaging.plyInfo} onChange={e=>setData(p=>({...p, packaging: {...p.packaging, plyInfo: e.target.value}}))} />
+             <div>
+                <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Box Size</label>
+                <input className="border p-1 rounded" placeholder="Box Size" value={data.packaging.cartonSize} onChange={e=>setData(p=>({...p, packaging: {...p.packaging, cartonSize: e.target.value}}))} />
+             </div>
+             <div>
+                <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Strap Color</label>
+                <input className="border p-1 rounded" placeholder="Strap Color" value={data.packaging.strapColor} onChange={e=>setData(p=>({...p, packaging: {...p.packaging, strapColor: e.target.value}}))} />
+             </div>
+             <div>
+                <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Ply</label>
+                <input className="border p-1 rounded" placeholder="Ply" value={data.packaging.plyInfo} onChange={e=>setData(p=>({...p, packaging: {...p.packaging, plyInfo: e.target.value}}))} />
+             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              {['cartonCondition','strapping','markings','polybagQuality','separators','paperConeTips'].map(k => (
