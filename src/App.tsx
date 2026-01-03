@@ -335,7 +335,7 @@ export default function App() {
 
           {data.status !== 'draft' && (
             <div className="flex flex-col gap-3">
-               <div className="flex gap-4 items-center"><span className="text-green-600 font-bold bg-green-50 px-2 py-1 rounded">Active</span><span className="text-xs font-mono">{data.location ? `${data.location.lat.toFixed(4)},${data.location.lng.toFixed(4)}` : 'Location not available'}</span><span className="text-xs font-mono">Start: {data.startTime ? new Date(data.startTime).toLocaleString() : 'Not started'}</span></div>
+               <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center"><span className="text-green-600 font-bold bg-green-50 px-2 py-1 rounded">Active</span><span className="text-xs font-mono">{data.location ? `${data.location.lat.toFixed(4)},${data.location.lng.toFixed(4)}` : 'Location not available'}</span><span className="text-xs font-mono">Start: {data.startTime ? new Date(data.startTime).toLocaleString() : 'Not started'}</span></div>
                <div className="flex items-center gap-3">
                   {data.inspectorSelfie ? <img src={data.inspectorSelfie} className="w-16 h-16 rounded object-cover border" /> : <label className="w-16 h-16 bg-slate-100 flex items-center justify-center rounded cursor-pointer border-2 border-dashed"><Camera className="w-6 h-6 text-slate-400"/><input type="file" accept="image/*" capture="environment" className="hidden" onChange={e=>{if(e.target.files?.[0]) setData(p=>({...p,inspectorSelfie:URL.createObjectURL(e.target.files![0])}))}}/></label>}
                   <div className="text-sm font-bold text-slate-600">Inspector Selfie</div>
@@ -346,7 +346,7 @@ export default function App() {
        
        <div className="bg-white p-6 rounded shadow-sm border">
           <h3 className="font-bold mb-4">Standards</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
              {Object.keys(data.standards).map(k => (
                 <div key={k}>
                    <label className="text-xs font-bold text-slate-500 uppercase block mb-1">{k.replace(/([A-Z])/g, ' $1')}</label>
@@ -390,7 +390,7 @@ export default function App() {
     <div className="space-y-6">
        <div className="bg-white p-6 rounded shadow-sm border">
           <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Sprout className="w-5 h-5 text-green-600"/> Cotton Parameters</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
              {([['2.5% Span Length','spanLength'], ['Micronaire','mic'], ['Strength','strength'], ['Trash%','trash'], ['RD','rd'], ['SFI','sfi'], ['+b','plusB'], ['Moisture%','moisture']] as const).map(([l,k]) => (
                 <div key={k}><label className="text-xs font-bold text-slate-500 block mb-1">{l}</label><input className="w-full p-2 border rounded" value={(data.cotton as any)[k]} onChange={e=>handleCotton(k, e.target.value)}/></div>
              ))}
@@ -409,7 +409,7 @@ export default function App() {
              ))}
           </div>
        </div>
-       <div className="flex justify-between"><button onClick={()=>setActiveTab('general')} className="text-slate-500">Back</button><button onClick={()=>setActiveTab('packaging')} className="bg-blue-600 text-white px-4 py-2 rounded">Next</button></div>
+       <div className="flex flex-col sm:flex-row justify-between gap-2"><button onClick={()=>setActiveTab('general')} className="text-slate-500 order-2 sm:order-1">Back</button><button onClick={()=>setActiveTab('packaging')} className="bg-blue-600 text-white px-4 py-2 rounded order-1 sm:order-2">Next</button></div>
     </div>
   );
 
@@ -417,7 +417,7 @@ export default function App() {
     <div className="space-y-6">
        <div className="bg-white p-6 rounded-xl border shadow-sm">
           <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Package className="w-5 h-5 text-orange-600"/> Packaging Specs</h3>
-          <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
              <div>
                 <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Box Size</label>
                 <input className="border p-1 rounded" placeholder="Box Size" value={data.packaging.cartonSize} onChange={e=>setData(p=>({...p, packaging: {...p.packaging, cartonSize: e.target.value}}))} />
@@ -440,7 +440,7 @@ export default function App() {
 
        <div className="bg-white p-6 rounded-xl border shadow-sm">
           <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Scale className="w-5 h-5 text-blue-600"/> Detailed Tare & Weights</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
              {([['Empty Carton','tareEmptyCarton'], ['Separators','tareSeparators'], ['Cones','tarePaperCones'], ['Polybags','tarePolybags'], ['Straps','tareStraps']] as const).map(([l,k]) => (
                 <TareEvidenceRow key={k} label={l} data={(data.packaging as any)[k]} onChange={v=>updateTare(k as any,v)} onPhotoAdd={e=>addTarePhoto(k as any,e)} onPhotoRemove={id=>removeTarePhoto(k as any,id)} />
              ))}
@@ -474,7 +474,7 @@ export default function App() {
              </div>
           </div>
        </div>
-       <div className="flex justify-between"><button onClick={()=>setActiveTab('raw_material')} className="text-slate-500">Back</button><button onClick={()=>setActiveTab('visual')} className="bg-blue-600 text-white px-4 py-2 rounded">Next</button></div>
+       <div className="flex flex-col sm:flex-row justify-between gap-2"><button onClick={()=>setActiveTab('raw_material')} className="text-slate-500 order-2 sm:order-1">Back</button><button onClick={()=>setActiveTab('visual')} className="bg-blue-600 text-white px-4 py-2 rounded order-1 sm:order-2">Next</button></div>
     </div>
   );
 
@@ -491,7 +491,7 @@ export default function App() {
              ))}
           </div>
        </div>
-       <div className="flex justify-between"><button onClick={()=>setActiveTab('packaging')} className="text-slate-500">Back</button><button onClick={()=>setActiveTab('lab')} className="bg-blue-600 text-white px-6 py-2 rounded">Next</button></div>
+       <div className="flex flex-col sm:flex-row justify-between gap-2"><button onClick={()=>setActiveTab('packaging')} className="text-slate-500 order-2 sm:order-1">Back</button><button onClick={()=>setActiveTab('lab')} className="bg-blue-600 text-white px-6 py-2 rounded order-1 sm:order-2">Next</button></div>
     </div>
   );
 
@@ -524,7 +524,7 @@ export default function App() {
              </table>
           </div>
        </div>
-       <div className="flex justify-between"><button onClick={()=>setActiveTab('visual')} className="text-slate-500">Back</button><button onClick={()=>{setData(p=>({...p,status:'completed',endTime:Date.now()}));setActiveTab('report')}} className="bg-green-600 text-white px-4 py-2 rounded">Finish & Preview</button></div>
+       <div className="flex flex-col sm:flex-row justify-between gap-2"><button onClick={()=>setActiveTab('visual')} className="text-slate-500 order-2 sm:order-1">Back</button><button onClick={()=>{setData(p=>({...p,status:'completed',endTime:Date.now()}));setActiveTab('report')}} className="bg-green-600 text-white px-4 py-2 rounded order-1 sm:order-2">Finish & Preview</button></div>
     </div>
   );
 
@@ -589,7 +589,7 @@ export default function App() {
            {reportMode === 'detailed' && (
               <div className="mt-6 break-inside-avoid">
                  <h4 className="font-bold border-b mb-2">Visual Defects Evidence</h4>
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {Object.entries(data.visualDefects).map(([k,v]) => v.count > 0 && (
                        <div key={k} className="border p-2 rounded text-xs">
                           <div className="font-bold capitalize">{k.replace(/([A-Z])/g, ' $1')}</div>
@@ -618,14 +618,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10 print:hidden p-4 flex justify-between items-center">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-10 print:hidden px-4 py-3 flex justify-between items-center">
          <div className="font-bold text-lg text-blue-900">YarnQuality<span className="text-blue-500">Pro</span></div>
-         <div className="flex gap-4 items-center">
+         <div className="flex gap-2 sm:gap-4 items-center">
             {data.status==='in-progress' && <div className="text-xs font-mono bg-red-100 text-red-600 px-2 py-1 rounded flex gap-1"><Timer className="w-3 h-3"/>{elapsedTime}</div>}
             <div className="flex gap-1 overflow-x-auto">{(['general','raw_material','packaging','visual','lab','report'] as const).map(t => <button key={t} onClick={()=>setActiveTab(t)} className={`w-3 h-3 rounded-full ${activeTab===t?'bg-blue-600':'bg-slate-200'}`} title={t}/>)}</div>
          </div>
       </header>
-      <main className="max-w-5xl mx-auto p-4 print:max-w-none print:p-0">
+      <main className="max-w-5xl mx-auto p-2 sm:p-4 print:max-w-none print:p-0">
          {activeTab==='general' && renderGeneral()}
          {activeTab==='raw_material' && renderRaw()}
          {activeTab==='packaging' && renderPkg()}
