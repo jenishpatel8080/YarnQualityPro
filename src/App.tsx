@@ -189,17 +189,98 @@ const DefectRow = ({ label, item, onCountChange, onRemarksChange, onPhotoAdd, on
   </div>
 );
 
-const SignaturePad = ({ label, onSave, existingSignature }: any) => {
+const SignaturePad = ({ label, onDraw, existingSignature }: any) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  useEffect(() => { const canvas = canvasRef.current; if (canvas) { const ctx = canvas.getContext('2d'); if (ctx) { ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; } } }, [existingSignature]);
-  const startDrawing = (e: any) => { setIsDrawing(true); const ctx = canvasRef.current?.getContext('2d'); const { x, y } = getCoords(e); ctx?.beginPath(); ctx?.moveTo(x, y); };
-  const draw = (e: any) => { if (!isDrawing) return; const ctx = canvasRef.current?.getContext('2d'); const { x, y } = getCoords(e); ctx?.lineTo(x, y); ctx?.stroke(); };
-  const stopDrawing = () => { setIsDrawing(false); if (canvasRef.current) onSave(canvasRef.current.toDataURL()); };
-  const getCoords = (e: any) => { const rect = canvasRef.current!.getBoundingClientRect(); const x = ('touches' in e ? e.touches[0].clientX : e.clientX) - rect.left; const y = ('touches' in e ? e.touches[0].clientY : e.clientY) - rect.top; return { x, y }; };
-  const clear = () => { const ctx = canvasRef.current?.getContext('2d'); ctx?.clearRect(0, 0, 300, 120); onSave(null); };
-  if (existingSignature) return <div className="border p-4 rounded bg-white"><img src={existingSignature} className="h-24 mb-2"/><button onClick={clear} className="text-xs text-red-500 flex items-center gap-1"><Eraser className="w-3 h-3"/> Clear</button></div>;
-  return <div className="border p-2 rounded bg-white"><div className="flex justify-between mb-2"><span className="text-xs font-bold">{label}</span><button onClick={clear} className="text-xs text-slate-400">Clear</button></div><canvas ref={canvasRef} width={300} height={120} className="border border-dashed bg-slate-50 w-full touch-none" onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing}/></div>;
+  const [hasDrawn, setHasDrawn] = useState(false);
+  
+  useEffect(() => { 
+    const canvas = canvasRef.current; 
+    if (canvas) { 
+      const ctx = canvas.getContext('2d'); 
+      if (ctx) { 
+        ctx.lineWidth = 2; 
+        ctx.lineCap = 'round'; 
+        ctx.strokeStyle = '#000'; 
+      } 
+    } 
+  }, [existingSignature]);
+  
+  const startDrawing = (e: any) => { 
+    setIsDrawing(true); 
+    setHasDrawn(true);
+    const ctx = canvasRef.current?.getContext('2d'); 
+    const { x, y } = getCoords(e); 
+    ctx?.beginPath(); 
+    ctx?.moveTo(x, y); 
+  };
+  
+  const draw = (e: any) => { 
+    if (!isDrawing) return; 
+    const ctx = canvasRef.current?.getContext('2d'); 
+    const { x, y } = getCoords(e); 
+    ctx?.lineTo(x, y); 
+    ctx?.stroke(); 
+  };
+  
+  const stopDrawing = () => { 
+    setIsDrawing(false); 
+    // Don't auto-save on stop drawing - only save when explicitly submitted
+  };
+  
+  const getCoords = (e: any) => { 
+    const rect = canvasRef.current!.getBoundingClientRect(); 
+    const x = ('touches' in e ? e.touches[0].clientX : e.clientX) - rect.left; 
+    const y = ('touches' in e ? e.touches[0].clientY : e.clientY) - rect.top; 
+    return { x, y }; 
+  };
+  
+  const clear = () => { 
+    const ctx = canvasRef.current?.getContext('2d'); 
+    ctx?.clearRect(0, 0, 300, 120); 
+    setHasDrawn(false);
+    onDraw(null); 
+  };
+  
+  const saveSignature = () => {
+    if (canvasRef.current && hasDrawn) {
+      onDraw(canvasRef.current.toDataURL());
+    }
+  };
+  
+  if (existingSignature) return (
+    <div className="border p-4 rounded bg-white">
+      <img src={existingSignature} className="h-24 mb-2"/>
+      <div className="flex gap-2">
+        <button onClick={clear} className="text-xs text-red-500 flex items-center gap-1"><Eraser className="w-3 h-3"/> Clear</button>
+        <button onClick={saveSignature} className="text-xs text-blue-500 flex items-center gap-1"><PenTool className="w-3 h-3"/> Edit</button>
+      </div>
+    </div>
+  );
+  
+  return (
+    <div className="border p-2 rounded bg-white">
+      <div className="flex justify-between mb-2">
+        <span className="text-xs font-bold">{label}</span>
+        <div className="flex gap-2">
+          <button onClick={clear} className="text-xs text-slate-400">Clear</button>
+          {hasDrawn && <button onClick={saveSignature} className="text-xs text-green-600">Save</button>}
+        </div>
+      </div>
+      <canvas 
+        ref={canvasRef} 
+        width={300} 
+        height={120} 
+        className="border border-dashed bg-slate-50 w-full touch-none" 
+        onMouseDown={startDrawing} 
+        onMouseMove={draw} 
+        onMouseUp={stopDrawing} 
+        onTouchStart={startDrawing} 
+        onTouchMove={draw} 
+        onTouchEnd={stopDrawing}
+      />
+    </div>
+  );
 };
 
 // --- MAIN APP ---
@@ -209,6 +290,8 @@ export default function App() {
   const [reportMode, setReportMode] = useState<'summary' | 'detailed'>('summary');
   const [elapsedTime, setElapsedTime] = useState<string>("00:00:00");
   const [loadingLoc, setLoadingLoc] = useState(false);
+  const [tempInspectorSig, setTempInspectorSig] = useState<string | null>(null);
+  const [tempManufacturerSig, setTempManufacturerSig] = useState<string | null>(null);
   const [isScanningOCR, setIsScanningOCR] = useState(false);
   
   const [data, setData] = useState<InspectionState>({
@@ -457,9 +540,9 @@ export default function App() {
           <div className="mt-6">
              <h4 className="font-bold text-sm text-slate-600 mb-2">Cone Weights (Gross)</h4>
              <ConeGridInput values={data.packaging.coneWeights} onInputChange={handleConeGrid} />
-             <div className="flex justify-between text-xs bg-slate-50 p-2 rounded font-mono mt-2">
-                <span>AVG: <b>{data.packaging.coneStats.avg}</b></span><span>CV%: <b>{data.packaging.coneStats.cv}</b></span>
-             </div>
+             <div className="flex gap-4 mb-6 text-xs bg-slate-50 p-2 rounded justify-center font-bold font-mono border">
+             <span>AVG: {data.packaging.coneStats.avg}</span><span>MIN: {data.packaging.coneStats.min}</span><span>MAX: {data.packaging.coneStats.max}</span><span>CV%: {data.packaging.coneStats.cv}</span>
+          </div>
              <div className="mt-4 flex gap-4 items-end bg-blue-50 p-3 rounded border border-blue-100">
                 <div>
                    <label className="text-xs font-bold text-blue-800 block mb-1">Single Empty Cone Weight (g)</label>
@@ -531,76 +614,235 @@ export default function App() {
   const renderReport = () => (
     <div className="space-y-6 pb-10">
        <div className="bg-white p-8 rounded shadow-lg print:shadow-none">
-          <div className="flex justify-between mb-6">
-             <div><h1 className="text-2xl font-bold">Inspection Report</h1><p className="text-slate-500">{data.supplierName}</p></div>
-             <button onClick={()=>{setReportMode('detailed');setTimeout(()=>window.print(),100)}} className="bg-blue-600 text-white px-4 py-2 rounded print:hidden flex gap-2"><FileCheck className="w-4 h-4"/> Download Detailed Report</button>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mb-6 text-sm bg-slate-50 p-4 rounded border">
-             <div><span className="block text-xs text-slate-400 uppercase">Buyer</span><b>{data.buyerName}</b><div className="text-xs">{data.buyerDetails}</div></div>
-             <div className="grid grid-cols-2 gap-2"><div><span className="block text-xs text-slate-400">Lot</span><b>{data.lotNo}</b></div><div><span className="block text-xs text-slate-400">Count</span><b>{data.yarnCountLabel}</b></div></div>
-          </div>
-          
-          <div className="mb-6 text-sm bg-slate-50 p-4 rounded border">
-             <h4 className="font-bold mb-2">Inspection Details</h4>
-             <p>Start Time: {data.startTime ? new Date(data.startTime).toLocaleString() : '--'}</p>
-             <p>End Time: {data.endTime ? new Date(data.endTime).toLocaleString() : '--'}</p>
-             <p>Duration: {elapsedTime}</p>
-          </div>
-          
-          <div className="mb-6 break-inside-avoid">
-             <h4 className="font-bold border-b mb-2">Weight Data</h4>
-             <div className="grid grid-cols-2 gap-4 text-xs">
-                <div><div className="font-bold mb-1">Tare (kg)</div>
-                   <div className="grid grid-cols-5 gap-1">{Object.keys(data.packaging).filter(k=>k.startsWith('tare')).map(k=><div key={k} className="border p-1 text-center bg-slate-50"><div>{k.replace('tare','')}</div><b>{(data.packaging as any)[k].weight}</b></div>)}</div>
-                   <div className="mt-2 font-bold">Total Tare: {data.packaging.calculatedTare} kg</div>
-                </div>
-                <div><div className="font-bold mb-1">Stats</div>
-                   <div className="grid grid-cols-2 gap-1 bg-slate-50 p-2 rounded">
-                      <div>Carton Avg: <b>{data.packaging.cartonStats.avg}</b></div><div>Net Wt: <b>{(parseFloat(data.packaging.cartonStats.avg)-parseFloat(data.packaging.calculatedTare)).toFixed(3)}</b></div>
-                   </div>
+          <div className="text-center mb-6">
+             <div className="flex items-center justify-center gap-4 mb-4">
+                {data.inspectorSelfie && (
+                   <img src={data.inspectorSelfie} alt="Inspector" className="w-16 h-16 rounded-full object-cover border-2 border-slate-200" />
+                )}
+                <div>
+                   <h1 className="text-2xl font-bold">Inspection Report</h1>
+                   <p className="text-slate-500 font-bold text-lg">{data.supplierName}</p>
                 </div>
              </div>
-             {reportMode === 'detailed' && (
-                <div className="mt-4">
-                   <div className="font-bold text-xs mb-1">Full Carton Weights</div>
-                   <div className="grid grid-cols-10 gap-1 text-[10px]">{data.packaging.cartonWeights.map((w,i) => <div key={i} className="border p-1 text-center bg-slate-50">{w.val}</div>)}</div>
-                   <div className="font-bold text-xs mb-1 mt-2">Tare Evidence</div>
-                   <div className="flex gap-2">{Object.keys(data.packaging).filter(k=>k.startsWith('tare')).map(k => (data.packaging as any)[k].photos.map((p:any) => <img key={p.id} src={p.url} className="w-10 h-10 border rounded"/>))}</div>
+             <div className="flex items-center justify-center gap-6 text-sm">
+                <div>
+                   <span className="font-bold capitalize">Start Time:</span>
+                   <span className="text-slate-500 ml-1">{data.startTime ? new Date(data.startTime).toLocaleString() : '--'}</span>
+                </div>
+                <div>
+                   <span className="font-bold capitalize">End Time:</span>
+                   <span className="text-slate-500 ml-1">{data.endTime ? new Date(data.endTime).toLocaleString() : '--'}</span>
+                </div>
+                <div>
+                   <span className="font-bold capitalize">Duration:</span>
+                   <span className="text-slate-500 ml-1">{elapsedTime}</span>
+                </div>
+             </div>
+          </div>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Lot Information</h4>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div><span className="font-bold capitalize">Buyer Name:</span> <span className="text-slate-500">{data.buyerName}</span></div>
+                <div><span className="font-bold capitalize">Supplier Name:</span> <span className="text-slate-500">{data.supplierName}</span></div>
+                <div><span className="font-bold capitalize">Lot No:</span> <span className="text-slate-500">{data.lotNo}</span></div>
+                <div><span className="font-bold capitalize">Count Label:</span> <span className="text-slate-500">{data.yarnCountLabel}</span></div>
+                <div><span className="font-bold capitalize">Packing Mode:</span> <span className="text-slate-500">{data.packaging.modeOfPacking}</span></div>
+                <div><span className="font-bold capitalize">Wax Status:</span> <span className="text-slate-500">{data.packaging.isWaxed}</span></div>
+                <div><span className="font-bold capitalize">Prod Start:</span> <span className="text-slate-500">{data.productionStartDate}</span></div>
+                <div><span className="font-bold capitalize">Prod End:</span> <span className="text-slate-500">{data.productionEndDate}</span></div>
+                <div className="md:col-span-2"><span className="font-bold capitalize">Total Quantity ({data.packaging.modeOfPacking === 'Box' ? 'Cartons' : data.packaging.modeOfPacking === 'Pallet' ? 'Pallets' : 'Bags'}):</span> <span className="text-slate-500">{data.packaging.totalCartonsInLot}</span></div>
+             </div>
+          </div>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Standards</h4>
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                {Object.keys(data.standards).map(k => (
+                   <div key={k}><span className="font-bold capitalize">{k.replace(/([A-Z])/g, ' $1')}:</span> <span className="text-slate-500">{(data.standards as any)[k]}</span></div>
+                ))}
+             </div>
+          </div>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Cotton Parameters</h4>
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                <div><span className="font-bold capitalize">2.5% Span Length:</span> <span className="text-slate-500">{data.cotton.spanLength || '-'}</span></div>
+                <div><span className="font-bold capitalize">Micronaire:</span> <span className="text-slate-500">{data.cotton.mic || '-'}</span></div>
+                <div><span className="font-bold capitalize">Strength:</span> <span className="text-slate-500">{data.cotton.strength || '-'}</span></div>
+                <div><span className="font-bold capitalize">Trash%:</span> <span className="text-slate-500">{data.cotton.trash || '-'}</span></div>
+                <div><span className="font-bold capitalize">RD:</span> <span className="text-slate-500">{data.cotton.rd || '-'}</span></div>
+                <div><span className="font-bold capitalize">SFI:</span> <span className="text-slate-500">{data.cotton.sfi || '-'}</span></div>
+                <div><span className="font-bold capitalize">+b:</span> <span className="text-slate-500">{data.cotton.plusB || '-'}</span></div>
+                <div><span className="font-bold capitalize">Moisture%:</span> <span className="text-slate-500">{data.cotton.moisture || '-'}</span></div>
+             </div>
+             {data.cotton.remarks && (
+                <div className="mb-4 hidden print:block">
+                   <span className="font-bold capitalize text-sm">Remarks:</span>
+                   <p className="text-slate-600 text-sm mt-1">{data.cotton.remarks}</p>
+                </div>
+             )}
+             {data.cotton.photos && data.cotton.photos.length > 0 && (
+                <div className="hidden print:block">
+                   <span className="font-bold capitalize text-sm">Photos:</span>
+                   <div className="flex flex-wrap gap-2 mt-2">
+                      {data.cotton.photos.map((photo, index) => (
+                         <div key={photo.id} className="relative">
+                            <img src={photo.url} alt={`Cotton Photo ${index + 1}`} className="h-32 w-auto object-contain border rounded" />
+                            <div className="text-xs text-slate-500 mt-1 text-center">{photo.timestamp}</div>
+                         </div>
+                      ))}
+                   </div>
                 </div>
              )}
           </div>
-
-          <div className="mb-6 break-inside-avoid">
-             <h4 className="font-bold border-b mb-2">Lab Results</h4>
-             <table className="w-full text-xs text-left mb-4">
-                <tbody>
-                   <tr><td>Count: <b>{data.labData.actualCount}</b></td><td>CSP: <b>{data.labData.csp}</b></td><td>Strength: <b>{data.labData.strength}</b></td></tr>
-                   <tr><td>U%: <b>{data.labData.uPercent}</b></td><td>Hairiness: <b>{data.labData.hairiness}</b></td><td>Moisture: <b>{data.labData.moisture}%</b></td><td>IPI: <b>{data.labData.ipi}</b></td></tr>
-                </tbody>
-             </table>
-             <div className="font-bold text-xs mb-1">IPI Details</div>
-             <table className="w-full text-xs text-center border">
-                <thead className="bg-slate-100"><tr><th>Thin -50%</th><th>Thick +50%</th><th>Neps +200%</th></tr></thead>
-                <tbody><tr><td>{data.labData.thin50}</td><td>{data.labData.thick50}</td><td>{data.labData.neps200}</td></tr></tbody>
-             </table>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Machinery</h4>
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div><span className="font-bold capitalize">Blow Room:</span> <span className="text-slate-500">{data.machinery.blowRoom || '-'}</span></div>
+                <div><span className="font-bold capitalize">Carding:</span> <span className="text-slate-500">{data.machinery.carding || '-'}</span></div>
+                <div><span className="font-bold capitalize">Comber:</span> <span className="text-slate-500">{data.machinery.comber || '-'}</span></div>
+                <div><span className="font-bold capitalize">Draw Frame:</span> <span className="text-slate-500">{data.machinery.drawFrame || '-'}</span></div>
+                <div><span className="font-bold capitalize">Simplex:</span> <span className="text-slate-500">{data.machinery.simplex || '-'}</span></div>
+                <div><span className="font-bold capitalize">Ring Frame:</span> <span className="text-slate-500">{data.machinery.ringFrame || '-'}</span></div>
+                <div><span className="font-bold capitalize">Compact:</span> <span className="text-slate-500">{data.machinery.compact || '-'}</span></div>
+                <div><span className="font-bold capitalize">Auto Coner:</span> <span className="text-slate-500">{data.machinery.autoConer || '-'}</span></div>
+             </div>
           </div>
           
-          {/* Detailed Evidence Blocks */}
-           {reportMode === 'detailed' && (
-              <div className="mt-6 break-inside-avoid">
-                 <h4 className="font-bold border-b mb-2">Visual Defects Evidence</h4>
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {Object.entries(data.visualDefects).map(([k,v]) => v.count > 0 && (
-                       <div key={k} className="border p-2 rounded text-xs">
-                          <div className="font-bold capitalize">{k.replace(/([A-Z])/g, ' $1')}</div>
-                          <div>Count: {v.count}</div>
-                          <div className="flex gap-1 mt-1">{v.photos.map(p=><img key={p.id} src={p.url} className="w-8 h-8 border"/>)}</div>
-                       </div>
-                    ))}
-                 </div>
-              </div>
-           )}
-
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Packaging Specs</h4>
+             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-4">
+                <div><span className="font-bold capitalize">Box Size:</span> <span className="text-slate-500">{data.packaging.cartonSize || '-'}</span></div>
+                <div><span className="font-bold capitalize">Strap Color:</span> <span className="text-slate-500">{data.packaging.strapColor || '-'}</span></div>
+                <div><span className="font-bold capitalize">Ply:</span> <span className="text-slate-500">{data.packaging.plyInfo || '-'}</span></div>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                {['cartonCondition','strapping','markings','polybagQuality','separators','paperConeTips'].map(k => (
+                   <div key={k} className="border-b pb-2">
+                      <div className="flex justify-between items-start">
+                         <span className="font-bold capitalize">{k.replace(/([A-Z])/g, ' $1')}:</span>
+                         <span className={`px-2 py-1 rounded text-xs font-bold ${(data.packaging as any)[k].status === 'pass' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{(data.packaging as any)[k].status || '-'}</span>
+                      </div>
+                      {(data.packaging as any)[k].remarks && (
+                         <p className="text-slate-600 text-sm mt-1 hidden print:block">{(data.packaging as any)[k].remarks}</p>
+                      )}
+                      {(data.packaging as any)[k].photos && (data.packaging as any)[k].photos.length > 0 && (
+                         <div className="flex flex-wrap gap-1 mt-2 hidden print:block">
+                            {(data.packaging as any)[k].photos.map((photo: any, index: number) => (
+                               <img key={photo.id} src={photo.url} alt={`${k} Photo ${index + 1}`} className="h-24 w-auto object-contain border rounded" />
+                            ))}
+                         </div>
+                      )}
+                   </div>
+                ))}
+             </div>
+          </div>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Detailed Tare & Weights</h4>
+             <div className="text-sm"><span className="font-bold capitalize">Total Tare:</span> <span className="text-slate-500">{data.packaging.calculatedTare || '-'} kg</span></div>
+          </div>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Carton Gross Weights</h4>
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div><span className="font-bold capitalize">AVG:</span> <span className="text-slate-500">{data.packaging.cartonStats.avg || '-'}</span></div>
+                <div><span className="font-bold capitalize">MIN:</span> <span className="text-slate-500">{data.packaging.cartonStats.min || '-'}</span></div>
+                <div><span className="font-bold capitalize">MAX:</span> <span className="text-slate-500">{data.packaging.cartonStats.max || '-'}</span></div>
+                <div><span className="font-bold capitalize">CV%:</span> <span className="text-slate-500">{data.packaging.cartonStats.cv || '-'}</span></div>
+             </div>
+          </div>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Cone Weights (Gross)</h4>
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div><span className="font-bold capitalize">AVG:</span> <span className="text-slate-500">{data.packaging.coneStats.avg || '-'}</span></div>
+                <div><span className="font-bold capitalize">CV%:</span> <span className="text-slate-500">{data.packaging.coneStats.cv || '-'}</span></div>
+                <div><span className="font-bold capitalize">MIN:</span> <span className="text-slate-500">{data.packaging.coneStats.min || '-'}</span></div>
+                <div><span className="font-bold capitalize">MAX:</span> <span className="text-slate-500">{data.packaging.coneStats.max || '-'}</span></div>
+                <div className="md:col-span-4"><span className="font-bold capitalize">Avg Net Weight:</span> <span className="text-slate-500">{data.packaging.coneStats.avg && data.packaging.emptyConeWeight ? (parseFloat(data.packaging.coneStats.avg) - parseFloat(data.packaging.emptyConeWeight)).toFixed(2) : '-'}</span></div>
+             </div>
+          </div>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Visual Defects Check</h4>
+             <div className="text-sm mb-2"><span className="font-bold capitalize">Sample Size:</span> <span className="text-slate-500">{data.totalConesInspected}</span></div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                {Object.keys(data.visualDefects).map(k => {
+                   const defect = (data.visualDefects as any)[k];
+                   return (
+                      <div key={k} className="border-b pb-3">
+                         <div className="flex justify-between items-start">
+                            <span className="font-bold capitalize">{k.replace(/([A-Z])/g, ' $1')}:</span>
+                            <span className="bg-slate-100 px-2 py-1 rounded text-sm font-bold">{defect.count}</span>
+                         </div>
+                         {defect.remarks && (
+                            <p className="text-slate-600 text-sm mt-1 hidden print:block">{defect.remarks}</p>
+                         )}
+                         {defect.photos && defect.photos.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2 hidden print:block">
+                               {defect.photos.map((photo: any, index: number) => (
+                                  <div key={photo.id} className="relative">
+                                     <img src={photo.url} alt={`${k} Photo ${index + 1}`} className="h-24 w-auto object-contain border rounded" />
+                                  </div>
+                               ))}
+                            </div>
+                         )}
+                      </div>
+                   );
+                })}
+             </div>
+          </div>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Lab Results</h4>
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                {Object.keys(data.labData).filter(k=>!['labRemarks','reportPhotos','thin30','thin40','thin50','thick35','thick50','neps140','neps200'].includes(k)).map(k => (
+                   <div key={k}><span className="font-bold capitalize">{k.replace(/([A-Z])/g, ' $1')}:</span> <span className="text-slate-500">{(data.labData as any)[k] || '-'}</span></div>
+                ))}
+             </div>
+             {data.labData.labRemarks && (
+                <div className="mb-4 hidden print:block">
+                   <span className="font-bold capitalize text-sm">Lab Remarks:</span>
+                   <p className="text-slate-600 text-sm mt-1">{data.labData.labRemarks}</p>
+                </div>
+             )}
+             {data.labData.reportPhotos && data.labData.reportPhotos.length > 0 && (
+                <div className="hidden print:block">
+                   <span className="font-bold capitalize text-sm">Lab Report Photos:</span>
+                   <div className="flex flex-wrap gap-2 mt-2">
+                      {data.labData.reportPhotos.map((photo, index) => (
+                         <div key={photo.id} className="relative">
+                            <img src={photo.url} alt={`Lab Report Photo ${index + 1}`} className="h-32 w-auto object-contain border rounded" />
+                            <div className="text-xs text-slate-500 mt-1 text-center">{photo.timestamp}</div>
+                         </div>
+                      ))}
+                   </div>
+                </div>
+             )}
+          </div>
+          
+          <div className="mb-6">
+             <h4 className="text-slate-500 font-bold text-lg border-b mb-4">Detailed IPI Breakdown</h4>
+             <div className="overflow-x-auto">
+                <table className="w-full text-sm text-center border-collapse border">
+                   <thead className="bg-slate-100 text-slate-500 uppercase text-xs">
+                      <tr><th className="border p-2" colSpan={3}>Thin (-%)</th><th className="border p-2" colSpan={2}>Thick (+%)</th><th className="border p-2" colSpan={2}>Neps (+%)</th></tr>
+                      <tr><th className="border p-2">-30%</th><th className="border p-2">-40%</th><th className="border p-2">-50%</th><th className="border p-2">+35%</th><th className="border p-2">+50%</th><th className="border p-2">+140%</th><th className="border p-2">+200%</th></tr>
+                   </thead>
+                   <tbody>
+                      <tr>
+                         {['thin30','thin40','thin50','thick35','thick50','neps140','neps200'].map(k => (
+                            <td key={k} className="border p-2">{(data.labData as any)[k] ? (data.labData as any)[k] : '-'}</td>
+                         ))}
+                      </tr>
+                   </tbody>
+                </table>
+             </div>
+          </div>
+          
           <div className="flex gap-4 mt-8 pt-4 border-t print:break-inside-avoid">
              <div className="flex-1 text-center"><div className="h-16 border-b border-dashed mb-1 flex items-end justify-center">{data.signatures.inspector && <img src={data.signatures.inspector} className="h-14"/>}</div><div className="text-xs font-bold">Inspector</div></div>
              <div className="flex-1 text-center"><div className="h-16 border-b border-dashed mb-1 flex items-end justify-center">{data.signatures.manufacturer && <img src={data.signatures.manufacturer} className="h-14"/>}</div><div className="text-xs font-bold">Mill Rep</div></div>
@@ -609,9 +851,24 @@ export default function App() {
        <div className="print:hidden bg-white p-4 rounded shadow mt-4">
           <h4 className="font-bold mb-4">Signatures</h4>
           <div className="flex gap-4">
-             <div className="flex-1"><SignaturePad label="Inspector" existingSignature={data.signatures.inspector} onSave={s=>setData(p=>({...p, signatures: {...p.signatures, inspector: s}}))} /></div>
-             <div className="flex-1"><SignaturePad label="Mill Rep" existingSignature={data.signatures.manufacturer} onSave={s=>setData(p=>({...p, signatures: {...p.signatures, manufacturer: s}}))} /></div>
+             <div className="flex-1"><SignaturePad label="Inspector" existingSignature={tempInspectorSig} onDraw={setTempInspectorSig} /></div>
+             <div className="flex-1"><SignaturePad label="Mill Rep" existingSignature={tempManufacturerSig} onDraw={setTempManufacturerSig} /></div>
           </div>
+          <div className="text-center mt-4">
+             <button onClick={() => setData(p => ({...p, signatures: {inspector: tempInspectorSig, manufacturer: tempManufacturerSig}}))} className="bg-green-600 text-white px-4 py-2 rounded">Submit Signatures</button>
+          </div>
+       </div>
+       <div className="text-center mt-4">
+          <button onClick={()=>{
+            setReportMode('detailed');
+            setTimeout(()=>{
+              // Set document title for PDF download
+              const originalTitle = document.title;
+              document.title = `${data.supplierName} - YarnQualityPro`;
+              window.print();
+              document.title = originalTitle;
+            },100);
+          }} className="bg-blue-600 text-white px-4 py-2 rounded print:hidden flex gap-2 mx-auto"><FileCheck className="w-4 h-4"/> Download Detailed Report</button>
        </div>
     </div>
   );
@@ -636,3 +893,4 @@ export default function App() {
     </div>
   );
 }
+

@@ -1,3 +1,56 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Print styles to prevent blank pages */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    margin: 0.3in;
+    font-size: 12px;
+  }
+  
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  .print\:block {
+    display: block !important;
+  }
+  
+  /* Reduce spacing in print */
+  .space-y-6 > * + * {
+    margin-top: 0.5rem !important;
+  }
+  
+  .mb-6 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .mb-4 {
+    margin-bottom: 0.3rem !important;
+  }
+  
+  .p-8 {
+    padding: 0.5rem !important;
+  }
+  
+  .gap-4 {
+    gap: 0.5rem !important;
+  }
+  
+  .text-lg {
+    font-size: 1rem !important;
+  }
+  
+  /* Prevent blank pages */
+  .bg-white {
+    page-break-inside: avoid;
+    margin-bottom: 0.3rem;
+  }
+  
+  h4 {
+    margin-bottom: 0.2rem !important;
+  }
+}
